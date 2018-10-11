@@ -285,7 +285,6 @@ contract('Dex Brokerage Token', (accounts) => {
 
     it("ApproveAndDeposit works correctly", async () => {
         let mock = await DexBrokerageMock.new();
-        let failingMock = await DexBrokerageToken.new();
 
         try {
             await token.approveAndDeposit(mock.address, oneToken, {from: user1});
