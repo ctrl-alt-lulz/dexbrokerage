@@ -1,6 +1,7 @@
 const DexBrokerageToken = artifacts.require("./DexBrokerageToken.sol");
 const EtherForcer = artifacts.require("./test/EtherForcer.sol");
 const ApproveAndCallMock = artifacts.require("./test/ApproveAndCallMock.sol");
+const DexBrokerageMock = artifacts.require("./test/DexBrokerageMock.sol");
 
 let owner;
 let user1;
@@ -282,6 +283,23 @@ contract('Dex Brokerage Token', (accounts) => {
         }
     });
 
+    it("ApproveAndDeposit works correctly", async () => {
+        let mock = await DexBrokerageMock.new();
+        let failingMock = await DexBrokerageToken.new();
+
+        try {
+            await token.approveAndDeposit(mock.address, oneToken, {from: user1});
+            assert(false);
+        } catch (e) {
+            expectRevert(e, "approveAndDeposit shouldn't work before tokens are transferable");
+        }
+
+        await token.enableTransfers();
+        assert(await token.approveAndDeposit(mock.address, oneToken));
+
+        assert(oneToken == (await token.balanceOf.call(mock.address)).toNumber(), "amount matches");
+    });
+
     it("Emergency ether withdrawal works", async () => {
         try {
             await token.withdrawEther({from: owner});
@@ -327,4 +345,5 @@ contract('Dex Brokerage Token', (accounts) => {
             expectRevert(e, "cannot transferOwnership to address(0)");
         }
     });
+
 });

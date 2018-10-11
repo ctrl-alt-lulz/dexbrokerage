@@ -4,6 +4,7 @@ import "./SafeMath.sol";
 import "./Ownable.sol";
 import "./ERC20.sol";
 import "./ApproveAndCall.sol";
+import "./DexBrokerage.sol";
 
 // ---------------------------------------------------------------------
 // 'Dex Brokerage Token - DEXB' token contract: https://dexbrokerage.com
@@ -179,6 +180,18 @@ contract DexBrokerageToken is Ownable {
     allowed[msg.sender][_recipient] = _value;
     ApproveAndCall(_recipient).receiveApproval(msg.sender, _value, address(this), _data);
     emit Approval(msg.sender, _recipient, allowed[msg.sender][_recipient]);
+    return true;
+  }
+
+  /**
+   * @dev Function to approve the transfer of the tokens and deposit them to DexBrokerage in one step
+   * @param _exchange DexBrokerage exchange address to deposit the tokens to
+   * @param _value The amount of tokens to send
+   */
+  function approveAndDeposit(DexBrokerage _exchange, uint _value) public returns (bool) {
+    allowed[msg.sender][_exchange] = _value;
+    emit Approval(msg.sender, _exchange, _value);
+    _exchange.receiveTokenDeposit(address(this), msg.sender, _value);
     return true;
   }
 
